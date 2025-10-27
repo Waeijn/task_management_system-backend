@@ -7,59 +7,54 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // GET /api/tasks
     public function index()
     {
-        //
+        return response()->json(Task::all());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // POST /api/tasks
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'in:pending,in-progress,completed',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $task = Task::create($validated);
+        return response()->json($task, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Task $task)
+    // GET /api/tasks/{id}
+    public function show($id)
     {
-        //
+        $task = Task::findOrFail($id);
+        return response()->json($task);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Task $task)
+    // PUT /api/tasks/{id}
+    public function update(Request $request, $id)
     {
-        //
+        $task = Task::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'in:pending,in-progress,completed',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $task->update($validated);
+        return response()->json($task);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Task $task)
+    // DELETE /api/tasks/{id}
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Task $task)
-    {
-        //
+        $task = Task::findOrFail($id);
+        $task->delete();
+        return response()->json(['message' => 'Task deleted successfully']);
     }
 }
